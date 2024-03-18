@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<group>
+	<equilibrium_temperature>976024</equilibrium_temperature>
+	<coupling>0.1306</coupling>
+	<Apply_Thermostat>1</Apply_Thermostat>
+	<particle_amount>522</particle_amount>
+</group>
