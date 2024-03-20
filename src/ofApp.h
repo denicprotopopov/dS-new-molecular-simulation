@@ -3,6 +3,9 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 
+
+#define INCLUDE_TRAILS false;
+
 struct Particle {
     glm::vec2 position;
     glm::vec2 velocity;
@@ -10,7 +13,7 @@ struct Particle {
     float kineticEnergy;
     float radius;
     std::deque<glm::vec2> trail;
-    int trailMaxLength = 20;
+    int trailMaxLength = 1;
     bool hasCollided;
 };
 

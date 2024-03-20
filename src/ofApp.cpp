@@ -8,7 +8,7 @@ void ofApp::setup(){
     gui.add(targetTemperature.setup("equilibrium temperature", 25000.0, 1000.0, 1000000.0));
     gui.add(coupling.setup("coupling", 0.5, 0.1, 1.0));
     gui.add(applyThermostat.setup("Apply Thermostat", true));
-    gui.add(particleAmount.setup("particle amount", 100, 2, 1000));
+    gui.add(particleAmount.setup("particle amount", 100, 2, 10000));
     gui.add(applyAmount.setup("Apply amount (reloads simulation for now)", false));
     gui.add(label.setup("Controls", "Press F to enter or exit fullscreen"));
     ofBackground(0);
@@ -42,6 +42,7 @@ void ofApp::draw(){
            // particle
            ofDrawCircle(particle.position, particle.radius);
 
+#ifdef INCLUDE_TRAILS
             // trail
            ofSetLineWidth(8);
            float alphaStep = 255.0f / particle.trail.size();
@@ -55,9 +56,11 @@ void ofApp::draw(){
            // Reset drawing settings
            ofSetLineWidth(1); // Reset line width to default
            ofSetColor(255, 255, 255, 255); // Reset color
+#endif
        }
     
     gui.draw();
+    ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), ofGetWidth()-20, 20);
 }
 
 
@@ -93,12 +96,14 @@ void ofApp::updateParticle(Particle &particle, float deltaTime) {
     particle.velocity += deltaTime * force / particle.mass;
     particle.position += deltaTime * particle.velocity;
 
+#ifdef INCLUDE_TRAILS
     particle.trail.push_front(particle.position);
 
         // removes old positions
         if (particle.trail.size() > particle.trailMaxLength) {
             particle.trail.pop_back();
         }
+#endif
 }
 
 void ofApp::checkWallCollisions(Particle &particle) {
@@ -118,11 +123,11 @@ void ofApp::resolveParticleCollisions() {
 
             for (int j = i + 1; j < particles.size(); ++j) {
                 glm::vec2 delta = particles[j].position - particles[i].position;
-                float dist = glm::length(delta);
+                float dist = delta.x * delta.x + delta.y * delta.y;
                 float totalRadius = particles[i].radius + particles[j].radius;
 
                 // detecting collisions
-                if (dist < totalRadius) {
+                if (dist < totalRadius * totalRadius) {
                     float mi = particles[i].mass;
                     float mj = particles[j].mass;
                     glm::vec2 vi = particles[i].velocity;
@@ -139,7 +144,7 @@ void ofApp::resolveParticleCollisions() {
                     particles[j].velocity = vCOM - vjCOM;
 
                     // prefenting overlap
-                    float overlap = 0.5f * (totalRadius - dist);
+                    float overlap = 0.2f;
                     glm::vec2 correction = glm::normalize(delta) * overlap;
                     particles[i].position -= correction;
                     particles[j].position += correction;
