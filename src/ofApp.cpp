@@ -153,9 +153,8 @@ void ofApp::resolveParticleCollisions() {
 }
 
 void ofApp::initializeParticles() {
-    for (auto& particle : particles) {
-        particles = {};
-        }
+    particles.clear();
+
     for (int i = 0; i < particleAmount; i++) {
         Particle p;
         p.position = glm::vec2(ofRandomWidth(), ofRandomHeight());
