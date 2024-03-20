@@ -113,10 +113,9 @@ void ofApp::checkWallCollisions(Particle &particle) {
 }
 
 void ofApp::resolveParticleCollisions() {
-    for (auto& particle : particles) {
-            particle.hasCollided = false;
-        }
     for (int i = 0; i < particles.size(); ++i) {
+            particles[i].hasCollided = false;
+
             for (int j = i + 1; j < particles.size(); ++j) {
                 glm::vec2 delta = particles[j].position - particles[i].position;
                 float dist = glm::length(delta);
