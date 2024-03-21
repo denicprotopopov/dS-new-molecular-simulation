@@ -32,6 +32,7 @@ class ofApp : public ofBaseApp{
         ofxToggle applyThermostat;
         ofxIntSlider particleAmount;
         ofxButton applyAmount;
+        ofxToggle applyCollision;
         ofxLabel label;
     
 

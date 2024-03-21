@@ -8,6 +8,7 @@ void ofApp::setup(){
     gui.add(targetTemperature.setup("equilibrium temperature", 25000.0, 1000.0, 1000000.0));
     gui.add(coupling.setup("coupling", 0.5, 0.1, 1.0));
     gui.add(applyThermostat.setup("Apply Thermostat", true));
+    gui.add(applyCollision.setup("Enable particles collision", true));
     gui.add(particleAmount.setup("particle amount", 100, 2, 10000));
     gui.add(applyAmount.setup("Apply amount (reloads simulation for now)", false));
     gui.add(label.setup("Controls", "Press F to enter or exit fullscreen"));
@@ -22,7 +23,9 @@ void ofApp::update(){
             updateParticle(particle, timeStep);
         }
 
+    if (applyCollision) {
         resolveParticleCollisions();
+    }
     
         if(applyAmount){
             initializeParticles();
