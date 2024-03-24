@@ -15,6 +15,8 @@ void ofApp::setup(){
     ofBackground(0);
     ofSetFrameRate(60);
     initializeParticles();
+
+    fbo.allocate(ofGetScreenWidth(), ofGetScreenHeight());
 }
 
 //--------------------------------------------------------------
@@ -41,13 +43,17 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    // fbo.clear();
+    fbo.begin();
+    ofClear(0,0,0, 250);
+
     for (const auto &particle : particles) {
            // particle
            ofDrawCircle(particle.position, particle.radius);
 
 #ifdef INCLUDE_TRAILS
             // trail
-           ofSetLineWidth(8);
+           ofSetLineWidth(particle.radius);
            float alphaStep = 255.0f / particle.trail.size();
            for (size_t i = 1; i < particle.trail.size(); i++) {
                float alpha = 255 - (i * alphaStep);
@@ -61,7 +67,9 @@ void ofApp::draw(){
            ofSetColor(255, 255, 255, 255); // Reset color
 #endif
        }
-    
+    fbo.end();
+    fbo.draw(0,0);
+
     gui.draw();
     ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), ofGetWidth()-20, 20);
 }
@@ -166,7 +174,7 @@ void ofApp::initializeParticles() {
         Particle p;
         p.position = glm::vec2(ofRandomWidth(), ofRandomHeight());
         p.velocity = glm::vec2(ofRandom(-1.0f, 100.0f), ofRandom(-1.0f, 200.0f));
-        p.radius = 5.0f;
+        p.radius = 3.0f;
         p.mass = 5.0f / 0.5f;  // radius/0.5f
         p.hasCollided = false;
         particles.push_back(p);
@@ -181,5 +189,6 @@ void ofApp::exit(){
 void ofApp::keyPressed(int key){
     if (key == 'f'){
         ofToggleFullscreen();
+        // fbo.clear();
     }
 }

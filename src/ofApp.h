@@ -4,7 +4,7 @@
 #include "ofxGui.h"
 
 
-#define INCLUDE_TRAILS false;
+// #define INCLUDE_TRAILS;
 
 struct Particle {
     glm::vec2 position;
@@ -13,7 +13,7 @@ struct Particle {
     float kineticEnergy;
     float radius;
     std::deque<glm::vec2> trail;
-    int trailMaxLength = 1;
+    int trailMaxLength = 30;
     bool hasCollided;
 };
 
@@ -35,6 +35,7 @@ class ofApp : public ofBaseApp{
         ofxToggle applyCollision;
         ofxLabel label;
     
+        ofFbo fbo;
 
         vector<Particle> particles;
         float timeStep = 0.01;
