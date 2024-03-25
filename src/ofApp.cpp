@@ -129,42 +129,57 @@ void ofApp::checkWallCollisions(Particle &particle) {
 }
 
 void ofApp::resolveParticleCollisions() {
+    for (auto& particle : particles) {
+        particle.hasCollided = false;
+    }
+
     for (int i = 0; i < particles.size(); ++i) {
-            particles[i].hasCollided = false;
+        for (int j = i + 1; j < particles.size(); ++j) {
+            glm::vec2 delta = particles[j].position - particles[i].position;
+            float dist = glm::length(delta);
+            float totalRadius = particles[i].radius + particles[j].radius;
 
-            for (int j = i + 1; j < particles.size(); ++j) {
-                glm::vec2 delta = particles[j].position - particles[i].position;
-                float dist = delta.x * delta.x + delta.y * delta.y;
-                float totalRadius = particles[i].radius + particles[j].radius;
+            // detecting collisions
+            if (dist < totalRadius) {
+                
+                glm::vec2 Vi = particles[i].velocity;
+                glm::vec2 Vj = particles[j].velocity;
+                glm::vec2 Qi = particles[i].position;
+                glm::vec2 Qj = particles[j].position;
 
-                // detecting collisions
-                if (dist < totalRadius * totalRadius) {
-                    float mi = particles[i].mass;
-                    float mj = particles[j].mass;
-                    glm::vec2 vi = particles[i].velocity;
-                    glm::vec2 vj = particles[j].velocity;
+                double MassA = particles[i].mass;
+                double MassB = particles[j].mass;
 
-                    //    calculate center of mass (COM) velocity
-                    glm::vec2 vCOM = (mi * vi + mj * vj) / (mi + mj);
-                    //    calculate velocity of particle i & j in COM frame
-                    glm::vec2 viCOM = vi - vCOM;
-                    glm::vec2 vjCOM = vj - vCOM;
+                // center of mass (COM) velocity
+                glm::vec2 Vcom = (MassA * Vi + MassB * Vj) / (MassA + MassB);
 
-                    // soft collisions
-                    particles[i].velocity = vCOM - viCOM;
-                    particles[j].velocity = vCOM - vjCOM;
+                // Velocities relative to COM
+                glm::vec2 Vicom = Vi - Vcom;
+                glm::vec2 Vjcom = Vj - Vcom;
 
-                    // prefenting overlap
-                    float overlap = 0.2f;
-                    glm::vec2 correction = glm::normalize(delta) * overlap;
-                    particles[i].position -= correction;
-                    particles[j].position += correction;
-                    particles[i].hasCollided = true;
-                    particles[j].hasCollided = true;
-                    
-                }
+                // calculate vector from i to j
+                glm::vec2 n12 = glm::normalize(Qj - Qi);
+
+                // calculate the parallel projection of i & j onto n12
+                glm::vec2 ViParProj = glm::dot(Vicom, n12) * n12;
+                glm::vec2 VjParProj = glm::dot(Vjcom, n12) * n12;
+
+                Vicom -= 2 * ViParProj;
+                Vjcom -= 2 * VjParProj;
+
+                particles[i].velocity = Vicom + Vcom;
+                particles[j].velocity = Vjcom + Vcom;
+
+                // prevent overlap
+                float overlap = 0.5f * (totalRadius - dist);
+                glm::vec2 correction = glm::normalize(delta) * overlap;
+                particles[i].position -= correction;
+                particles[j].position += correction;
+                particles[i].hasCollided = true;
+                particles[j].hasCollided = true;
             }
         }
+    }
 }
 
 void ofApp::initializeParticles() {
@@ -175,7 +190,7 @@ void ofApp::initializeParticles() {
         p.position = glm::vec2(ofRandomWidth(), ofRandomHeight());
         p.velocity = glm::vec2(ofRandom(-1.0f, 100.0f), ofRandom(-1.0f, 200.0f));
         p.radius = 3.0f;
-        p.mass = 5.0f / 0.5f;  // radius/0.5f
+        p.mass = p.radius / 0.5f;  // radius/0.5f
         p.hasCollided = false;
         particles.push_back(p);
     }
